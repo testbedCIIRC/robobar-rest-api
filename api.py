@@ -14,14 +14,6 @@ CORS(app)
 
 opc_client_instance = opc_client.RobobarOpcClient('opc.tpc://10.35.91.101:4840')
 
-
-class StatusCodes(Enum):
-    OK = 0
-    UNDEFINED_ERROR = -1
-    TIMEOUT = -2
-# parser = reqparse.RequestParser()
-# parser.add_argument('newOrder', type=dict, location="body")
-
 DRINK_TYPES_JSON_EXAMPLE = {
     "drinkTypes": [
         {
@@ -112,72 +104,75 @@ DRINK_IN_PROGRESS_JSON_EXAMPLE = {
 
 class DrinkTypes(Resource):
     def get(self):
-        # return DRINK_TYPES_JSON_EXAMPLE
-        drink_types = opc_client_instance.get_drink_types_json()
+        return_code, drink_types = opc_client_instance.get_drink_types_json()
 
-        if drink_types is opc_client.ReturnCodes.NOK:
-            return {'statusCode': StatusCodes.UNDEFINED_ERROR}
+        message = {
+            'statusCode': return_code.value,
+            'data': drink_types,
+        }
 
-        return drink_types
+        return message
 
 class QueueState(Resource):
     def get(self):
-        queue_state = opc_client_instance.get_queue_drinks_json()
+        return_code, queue_state = opc_client_instance.get_queue_drinks_json()
 
-        if queue_state is opc_client.ReturnCodes.NOK:
-            return {'statusCode': StatusCodes.UNDEFINED_ERROR}
+        message = {
+            'statusCode': return_code.value,
+            'data': queue_state,
+        }
 
-        return queue_state
-        # return QUEUE_STATE_JSON_EXAMPLE
+        return message
 
 class PlcCurrentTime(Resource):
     def get(self):
-        current_plc_time = opc_client_instance.get_current_plc_time()
+        return_code, current_plc_time = opc_client_instance.get_current_plc_time()
 
-        if current_plc_time is opc_client.ReturnCodes.NOK:
-            return {'statusCode': StatusCodes.UNDEFINED_ERROR}
+        message = {
+            'statusCode': return_code.value,
+            'data': current_plc_time,
+        }
 
-        return current_plc_time
+        return message
 
 class PickUpDrinksState(Resource):
     def get(self):
-        pickup_drinks = opc_client_instance.get_pickup_drinks_json()
+        return_code, pickup_drinks = opc_client_instance.get_pickup_drinks_json()
 
-        if pickup_drinks is opc_client.ReturnCodes.NOK:
-            return {'statusCode': StatusCodes.UNDEFINED_ERROR}
+        message = {
+            'statusCode': return_code.value,
+            'data': pickup_drinks,
+        }
 
-        return pickup_drinks
+        return message
 
 class DrinkInProgress(Resource):
     def get(self, side=0):
-        prep_drink = opc_client_instance.get_prep_drink_json(side)
+        return_code, prep_drink = opc_client_instance.get_prep_drink_json(side)
 
-        if prep_drink is opc_client.ReturnCodes.NOK:
-            return {'statusCode': StatusCodes.UNDEFINED_ERROR}
+        message = {
+            'statusCode': return_code.value,
+            'data': prep_drink,
+        }
 
-        return prep_drink
+        return message
 
 class NewDrinkInQueue(Resource):
     def post(self):
-        # args = parser.parse_args()
-        # print(args['newOrder'])
         json_body = request.get_json(force=True)
 
-        new_drink_status = opc_client_instance.push_new_drink(
+        return_code, new_drink_status = opc_client_instance.push_new_drink(
             drink_type_id=json_body['drinkId'],
             new_order_use_ice=json_body['subChoices']['useIce'],
             drink_size=2 if json_body['subChoices']['useLargeGlass'] else 1
         )
 
-        if new_drink_status is opc_client.ReturnCodes.NOK:
-            return {'statusCode': StatusCodes.UNDEFINED_ERROR}
-        elif new_drink_status is opc_client.ReturnCodes.TIMEOUT:
-            return {
-                'Error': 'Request to push a new drink has timed out.',
-                'statusCode': opc_client.ReturnCodes.TIMEOUT,
-            }
+        message = {
+            'statusCode': return_code.value,
+            'data': new_drink_status,
+        }
 
-        return request.get_json(force=True)
+        return message
 
 
 api.add_resource(DrinkTypes, '/DrinkTypes/')
@@ -189,5 +184,6 @@ api.add_resource(NewDrinkInQueue, '/NewDrinkInQueue/')
 
 if __name__ == '__main__':
     conn_thread = threading.Thread(target=opc_client_instance.create_and_maintain_connection)
+    conn_thread.daemon = True
     conn_thread.start()
     app.run(host='0.0.0.0', debug=True)
