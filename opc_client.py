@@ -195,7 +195,7 @@ class RobobarOpcClient(Client):
             print('Exception message: {0}\nTry getting drink types later.'.format(e))
 
             return ReturnCodes.NOK, None
-        
+
         drink_types_obj = {
             "drinkTypes": [],
         }
@@ -377,6 +377,9 @@ class RobobarOpcClient(Client):
             # connection to server
             try:
                 self.connect()
+                # required to read structures (otherwise, ExtensionObject byte array returned)
+                self.load_type_definitions()
+                self._init_nodes()
                 print('INFO: New connection created.')
                 self.connected = True
             except Exception as e:
