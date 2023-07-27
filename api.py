@@ -163,8 +163,8 @@ class NewDrinkInQueue(Resource):
 
         return_code, new_drink_status = opc_client_instance.push_new_drink(
             drink_type_id=json_body['drinkId'],
-            new_order_use_ice=json_body['subChoices']['useIce'],
-            drink_size=2 if json_body['subChoices']['useLargeGlass'] else 1
+            new_order_use_ice=True if json_body['useIce'] else False,
+            drink_size=2 if json_body['useLargeGlass'] else 1
         )
 
         message = {

@@ -191,6 +191,14 @@ class RobobarOpcClient(Client):
 
         try:
             drink_types = self._drink_types_node.get_value()
+            beer_enabled, coffee_enabled, postmix_enabled, conveyor_enabled, ice_enabled = \
+                self.get_values([
+                    self.get_node('ns=3;s="Drink_DB"."beerEnabled"'),
+                    self.get_node('ns=3;s="Drink_DB"."coffeeEnabled"'),
+                    self.get_node('ns=3;s="Drink_DB"."postmixEnabled"'),
+                    self.get_node('ns=3;s="Drink_DB"."conveyorEnabled"'),
+                    self.get_node('ns=3;s="Drink_DB"."iceEnabled"'),
+                ])
         except Exception as e:
             print('Exception message: {0}\nTry getting drink types later.'.format(e))
 
@@ -201,17 +209,27 @@ class RobobarOpcClient(Client):
         }
 
         for ii, drink_type in enumerate(drink_types):
+            isSoft = drink_type.postmixDrink != "" and drink_type.conveyorDrink == ""
+            isAlco = drink_type.conveyorDrink != ""
+            isCoffee = drink_type.coffeeDrink != ""
+            isBeer = drink_type.recipe.robotBeer.useStep
+            isEnabled = \
+                (isSoft and postmix_enabled) or\
+                (isAlco and conveyor_enabled) or\
+                (isCoffee and coffee_enabled) or\
+                (isBeer and beer_enabled)
+
             drink_types_obj["drinkTypes"].append({
                 "id": ii, 
                 "name": drink_type.drinkName,
-                "enabled": drink_type.drinkEnabled,
+                "enabled": isEnabled,
                 "drinkGroups": {
-                    "soft": drink_type.postmixDrink != "" and drink_type.conveyorDrink == "",
-                    "alcohol": drink_type.conveyorDrink != "",
-                    "coffee": drink_type.coffeeDrink != "",
+                    "soft": isSoft,
+                    "alcohol": isAlco or isBeer,
+                    "coffee": isCoffee,
                 },
-                "iceOption": drink_type.iceOption,
-                "volumeOption": drink_type.volumeOption,
+                "iceOption": False,
+                "volumeOption": isSoft,
                 "parameters": {
                     "showParameters": drink_type.parameters.showParameters,
                     "coffeeStrength": drink_type.parameters.coffeeStrength,
