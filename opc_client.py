@@ -126,9 +126,9 @@ class RobobarOpcClient(Client):
         for byte_index, dt_byte in enumerate(byte_array):
             if byte_index > 5:
                 break
-            high = dt_byte >> 4;
-            low = dt_byte & 0xF;
-            number = 10 * high + low;
+            high = dt_byte >> 4
+            low = dt_byte & 0xF
+            number = 10 * high + low
             if VALUE_NAMES[byte_index] == 'year':
                 number += 2000
             date_dict[VALUE_NAMES[byte_index]] = number
@@ -149,23 +149,31 @@ class RobobarOpcClient(Client):
             return ReturnCodes.NO_CONNECTION, None
 
         try:
-            queue_items_array = self._queue_items_node.get_value()
-            queue_start_index = self._queue_start_index.get_value()
-            queue_end_index = self._queue_end_index.get_value()
-            current_queue_length = self._current_queue_length_node.get_value()
-            queue_read_index = self._queue_read_index_node.get_value()
+            values = self.get_values([
+                self._queue_items_node,
+                self._queue_start_index,
+                self._queue_end_index,
+                self._current_queue_length_node,
+                self._queue_read_index_node
+            ])
+            # queue_items_array = self._queue_items_node.get_value()
+            # queue_start_index = self._queue_start_index.get_value()
+            # queue_end_index = self._queue_end_index.get_value()
+            # current_queue_length = self._current_queue_length_node.get_value()
+            # queue_read_index = self._queue_read_index_node.get_value()
         except Exception as e:
             print('Exception message: {0}\nTry getting queue drinks later.'.format(e))
 
             return ReturnCodes.NOK, None
 
-        queue_drinks = RobobarOpcClient.get_items_from_circular_buffer(
-            queue_items_array,
-            queue_read_index,
-            current_queue_length,
-            queue_start_index,
-            queue_end_index
-        )
+        queue_drinks = RobobarOpcClient.get_items_from_circular_buffer(*values)
+        # queue_drinks = RobobarOpcClient.get_items_from_circular_buffer(
+        #     queue_items_array,
+        #     queue_read_index,
+        #     current_queue_length,
+        #     queue_start_index,
+        #     queue_end_index
+        # )
 
         queue_drinks_obj = {
             "queueDrinks": [
