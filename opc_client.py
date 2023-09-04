@@ -151,16 +151,16 @@ class RobobarOpcClient(Client):
         try:
             values = self.get_values([
                 self._queue_items_node,
+                self._queue_read_index_node,
+                self._current_queue_length_node,
                 self._queue_start_index,
                 self._queue_end_index,
-                self._current_queue_length_node,
-                self._queue_read_index_node
             ])
             # queue_items_array = self._queue_items_node.get_value()
+            # queue_read_index = self._queue_read_index_node.get_value()
+            # current_queue_length = self._current_queue_length_node.get_value()
             # queue_start_index = self._queue_start_index.get_value()
             # queue_end_index = self._queue_end_index.get_value()
-            # current_queue_length = self._current_queue_length_node.get_value()
-            # queue_read_index = self._queue_read_index_node.get_value()
         except Exception as e:
             print('Exception message: {0}\nTry getting queue drinks later.'.format(e))
 
