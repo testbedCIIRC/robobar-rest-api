@@ -24,9 +24,11 @@ def main() -> None:
     app.include_router(root_router)
 
     opc_manager_instance.create_new_instance("opc.tpc://10.100.0.210:4840")
+    if opc_manager_instance.client_instance is None:
+        return
     opc_manager_instance.start_connection_thread()
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
 
     opc_manager_instance.client_instance.exit = True
     if opc_manager_instance.connection_thread is not None:

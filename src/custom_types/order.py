@@ -39,7 +39,7 @@ class Order(BaseModel):
     )
 
     @classmethod
-    def model_validate_without_prep_times(cls, obj: Any) -> "Order":
+    def model_validate_without_prep_times(cls, obj: Any) -> "Order":  # noqa: ANN401
         """Validate the model without prep time fields."""
         prep_time_attributes = ["prep_started_at", "prep_done_at", "prepStartAt", "prepDoneAt"]
         for attr in prep_time_attributes:

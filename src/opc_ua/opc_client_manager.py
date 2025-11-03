@@ -34,3 +34,11 @@ class OpcClientManager(BaseModel):
 
 
 opc_manager_instance: OpcClientManager = OpcClientManager()
+
+
+def get_client_instance() -> RobobarOpcClient:
+    """Get the OPC UA client instance."""
+    if opc_manager_instance.client_instance is None:
+        error_msg = "Client instance is not created."
+        raise ValueError(error_msg)
+    return opc_manager_instance.client_instance
