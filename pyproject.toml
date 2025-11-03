@@ -1,0 +1,23 @@
+[project]
+name = "robobar-rest-api"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "asyncua>=1.1.8",
+    "fastapi>=0.119.0",
+    "uvicorn[standard]>=0.38.0",
+]
+
+[tool.ruff]
+line-length = 120
+select = ["ALL"]
+extend-exclude = [
+    "typings"
+]
+
+[tool.ruff.lint]
+select = ["ALL"]
+extend-select = ["E501"]  # line-length
+ignore = ["BLE001"]
